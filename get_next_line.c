@@ -6,18 +6,15 @@
 /*   By: aouloube <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/12/14 18:06:29 by aouloube          #+#    #+#             */
-/*   Updated: 2015/12/28 12:35:25 by aouloube         ###   ########.fr       */
+/*   Updated: 2015/12/30 16:28:40 by aouloube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
-#include <fcntl.h>
-#include <stdio.h>
+#include "get_next_line.h"
 
 char	*ft_removestrstr(int size, char *s1)
 {
 	char	*str;
-	int		i;
 
 	str = ft_strnew(ft_strlen(s1) - size);
 	str = ft_strsub(s1, size + 1, ft_strlen(s1));
@@ -29,59 +26,54 @@ char	*ft_get_line(char *s1)
 	char	*str;
 	int		i;
 
+	i = 0;
 	while (s1[i] != '\n' && s1[i])
 		i++;
 	str = ft_strnew(i);
+	if (!str)
+		return (NULL);
 	i = 0;
 	while (s1[i] != '\n' && s1[i])
 	{
 		str[i] = s1[i];
 		i++;
 	}
+	str[i] = '\0';
 	return (str);
+}
+
+char	*ft_strjoinfree(char *s1, char *s2)
+{
+	char	*tmp;
+
+	tmp = ft_strjoin(s1, s2);
+	free(s2);
+	return (tmp);
 }
 
 int		get_next_line(int fd, char **line)
 {
-	int			buff = -1;
-	static char		*storage = NULL;
-	char	*tmp;
+	static char	*storage = NULL;
+	char		*tmp;
+	int			result;
 
-	*line = NULL;
-	tmp = ft_strnew(buff);
-	if (!storage)
-		storage = ft_strnew(buff);
-	while (read(fd, tmp, buff) && !ft_strstr(tmp, "\n"))
+	tmp = ft_strnew(BUFF_SIZE);
+	if (!tmp || !line)
+		return (-1);
+	*line = (!storage) ? NULL : *line;
+	storage = (!storage) ? ft_strnew(BUFF_SIZE) : storage;
+	while (((result = read(fd, tmp, BUFF_SIZE)) > 0) && !ft_strstr(tmp, "\n"))
 	{
-		storage = ft_strjoin(storage, tmp);
+		storage = ft_strjoinfree(storage, tmp);
+		tmp = ft_strnew(BUFF_SIZE);
 	}
-	storage = ft_strjoin(storage, tmp);
+	if (result > 0)
+		storage = ft_strjoinfree(storage, tmp);
+	else if (result < 0)
+		return (-1);
+	if (ft_strlen(ft_get_line(storage)) == 0 && ft_strcmp(storage, "\n"))
+		return (0);
 	*line = ft_get_line(storage);
-	storage =  ft_removestrstr(ft_strlen(*line), storage);
-	return (0);
-}
-
-
-
-int main(int argc, char **argv)
-{
-	char *line;
-	int fd;
-
-	fd = open(argv[1], O_RDONLY);
-	/*while (get_next_line(fd, &line) > 0)
-	{
-		printf("[%s]\n", line);
-	}*/
-	get_next_line(fd, &line);
-	printf("[%s]\n", line);
-	get_next_line(fd, &line);
-	printf("[%s]\n", line);
-	get_next_line(fd, &line);
-	printf("[%s]\n", line);
-	get_next_line(fd, &line);
-	printf("[%s]\n", line);
-	printf("****%d****", get_next_line(fd, &line));
-	printf("[%s]\n", line);
-	close(fd);
+	storage = ft_removestrstr(ft_strlen(*line), storage);
+	return (1);
 }
