@@ -6,11 +6,12 @@
 /*   By: aouloube <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/12/14 18:06:29 by aouloube          #+#    #+#             */
-/*   Updated: 2015/12/30 16:28:40 by aouloube         ###   ########.fr       */
+/*   Updated: 2016/01/04 16:26:18 by aouloube         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdio.h>
 
 char	*ft_removestrstr(int size, char *s1)
 {
@@ -71,7 +72,8 @@ int		get_next_line(int fd, char **line)
 		storage = ft_strjoinfree(storage, tmp);
 	else if (result < 0)
 		return (-1);
-	if (ft_strlen(ft_get_line(storage)) == 0 && ft_strcmp(storage, "\n"))
+	if (ft_strlen(ft_removestrstr(ft_strlen(ft_get_line(storage)), storage))
+			== 0 && !ft_strcmp(storage, "\0") && ft_strcmp(storage, "\n"))
 		return (0);
 	*line = ft_get_line(storage);
 	storage = ft_removestrstr(ft_strlen(*line), storage);
